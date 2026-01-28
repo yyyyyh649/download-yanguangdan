@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>赵氏眼科验光单</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --primary: #1f3c88;
+      --accent: #f3a712;
+      --text: #1a1a1a;
+      --muted: #6c7480;
+      --border: #d8deea;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: radial-gradient(circle at 20% 20%, rgba(243, 167, 18, 0.08), transparent 32%),
+                  radial-gradient(circle at 80% 10%, rgba(31, 60, 136, 0.12), transparent 32%),
+                  var(--bg);
+      font-family: "Microsoft YaHei", "Noto Sans SC", "PingFang SC", sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 32px 16px 64px;
+    }
+
+    .shell {
+      width: min(1100px, 100%);
+    }
+
+    h1 {
+      margin: 0 0 24px;
+      font-size: 28px;
+      letter-spacing: 0.5px;
+      color: var(--primary);
+      text-align: center;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 16px;
+      box-shadow: 0 20px 70px rgba(0, 34, 90, 0.08);
+      border: 1px solid var(--border);
+      padding: 24px;
+    }
+
+    form {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px 20px;
+      margin-bottom: 20px;
+    }
+
+    label {
+      font-weight: 600;
+      color: var(--primary);
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      font-size: 14px;
+      font-family: inherit;
+      color: var(--text);
+      background: #fafbff;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(31, 60, 136, 0.16);
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 18px;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      color: #fff;
+      background: linear-gradient(135deg, #1f3c88, #1c2f66);
+      box-shadow: 0 12px 30px rgba(31, 60, 136, 0.25);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    button.secondary {
+      background: #fff;
+      color: var(--primary);
+      border: 1px solid var(--border);
+      box-shadow: none;
+    }
+
+    button:hover { transform: translateY(-1px); }
+    button:active { transform: translateY(0); box-shadow: 0 8px 18px rgba(31, 60, 136, 0.18); }
+
+    .preview {
+      margin-top: 28px;
+      padding: 20px;
+      background: #f9fbff;
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 14px;
+      margin-top: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0, 24, 72, 0.06);
+    }
+
+    th, td {
+      border-bottom: 1px solid var(--border);
+      padding: 10px 12px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    th {
+      background: #eef2fb;
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    .pdf-area {
+      background: #fff;
+      color: #000;
+      width: 800px;
+      margin: 0 auto;
+      padding: 32px 40px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      font-family: "Microsoft YaHei", "Noto Sans SC", "PingFang SC", sans-serif;
+    }
+
+    .pdf-title { font-size: 24px; font-weight: 800; text-align: center; margin-bottom: 16px; }
+    .pdf-meta { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 16px; margin-bottom: 18px; }
+    .pdf-meta span { font-size: 14px; }
+    .pdf-table { width: 100%; border-collapse: collapse; margin-bottom: 18px; }
+    .pdf-table th, .pdf-table td { border: 1px solid #000; padding: 8px 10px; text-align: center; font-size: 13px; }
+    .pdf-result { height: 80px; border: 1px solid #000; border-radius: 6px; padding: 10px; font-size: 14px; }
+    .note { color: var(--muted); font-size: 13px; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <h1>赵氏眼科验光单生成器</h1>
+    <div class="card">
+      <form id="rx-form">
+        <div>
+          <label for="customerName">客户姓名</label>
+          <input id="customerName" name="customerName" required placeholder="请输入客户姓名" />
+        </div>
+        <div>
+          <label for="phone">电话</label>
+          <input id="phone" name="phone" required placeholder="请输入联系电话" />
+        </div>
+        <div>
+          <label for="optometrist">验光师</label>
+          <select id="optometrist" name="optometrist" required>
+            <option value="">请选择验光师</option>
+            <option>闫利海</option>
+            <option>胡利红</option>
+            <option>李慧</option>
+            <option>张琦</option>
+            <option>刘非</option>
+          </select>
+        </div>
+        <div>
+          <label for="time">验光时间</label>
+          <input id="time" name="time" type="datetime-local" />
+        </div>
+      </form>
+
+      <div class="grid-2" id="eyes">
+        <div>
+          <label>右眼</label>
+          <div class="grid-2" style="grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));">
+            <div><input data-eye="R" data-field="sphere" placeholder="球镜(SPH)" /></div>
+            <div><input data-eye="R" data-field="cylinder" placeholder="柱镜(CYL)" /></div>
+            <div><input data-eye="R" data-field="axis" placeholder="轴位(AXIS)" /></div>
+            <div><input data-eye="R" data-field="add" placeholder="ADD" /></div>
+          </div>
+        </div>
+        <div>
+          <label>左眼</label>
+          <div class="grid-2" style="grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));">
+            <div><input data-eye="L" data-field="sphere" placeholder="球镜(SPH)" /></div>
+            <div><input data-eye="L" data-field="cylinder" placeholder="柱镜(CYL)" /></div>
+            <div><input data-eye="L" data-field="axis" placeholder="轴位(AXIS)" /></div>
+            <div><input data-eye="L" data-field="add" placeholder="ADD" /></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="preview-btn" type="button">生成预览</button>
+        <button id="download-btn" type="button" class="secondary">下载 PDF</button>
+      </div>
+
+      <div class="note">生成 PDF 时会自动套用微软雅黑字体，并保留“验光结果”空白区域供手写。</div>
+
+      <div id="preview" class="preview" style="display:none;"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script>
+    const form = document.getElementById('rx-form');
+    const preview = document.getElementById('preview');
+    const previewBtn = document.getElementById('preview-btn');
+    const downloadBtn = document.getElementById('download-btn');
+    const eyeInputs = Array.from(document.querySelectorAll('#eyes input'));
+    const timeInput = document.getElementById('time');
+
+    const safeName = (str, fallback) => {
+      const cleaned = (str || '').replace(/[\\/:*?"<>|]/g, '').trim();
+      return cleaned || fallback;
+    };
+
+    const formatDateForFile = (isoString) => {
+      const d = new Date(isoString || Date.now());
+      if (Number.isNaN(d.getTime())) return '';
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      const yyyy = d.getFullYear();
+      return `${mm}${dd}${yyyy}`;
+    };
+
+    const setDefaultTime = () => {
+      const now = new Date();
+      const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+        .toISOString()
+        .slice(0, 16);
+      if (!timeInput.value) timeInput.value = local;
+    };
+
+    const getFormData = () => {
+      const formData = new FormData(form);
+      const eyeData = { R: {}, L: {} };
+      eyeInputs.forEach((input) => {
+        const eye = input.dataset.eye;
+        const field = input.dataset.field;
+        eyeData[eye][field] = input.value.trim();
+      });
+      return {
+        customerName: formData.get('customerName')?.trim() || '',
+        phone: formData.get('phone')?.trim() || '',
+        optometrist: formData.get('optometrist') || '',
+        time: formData.get('time') || timeInput.value || new Date().toISOString().slice(0, 16),
+        eyeData,
+      };
+    };
+
+    const buildPdfDom = (data) => {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'pdf-area';
+      wrapper.innerHTML = `
+        <div class="pdf-title">赵氏眼科验光单</div>
+        <div class="pdf-meta">
+          <span>客户姓名：${data.customerName}</span>
+          <span>联系电话：${data.phone}</span>
+          <span>验光师：${data.optometrist}</span>
+          <span>验光时间：${data.time.replace('T', ' ')}</span>
+        </div>
+        <table class="pdf-table">
+          <thead>
+            <tr>
+              <th></th><th>球镜 (SPH)</th><th>柱镜 (CYL)</th><th>轴位 (AXIS)</th><th>ADD</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>右眼</td>
+              <td>${data.eyeData.R.sphere || ''}</td>
+              <td>${data.eyeData.R.cylinder || ''}</td>
+              <td>${data.eyeData.R.axis || ''}</td>
+              <td>${data.eyeData.R.add || ''}</td>
+            </tr>
+            <tr>
+              <td>左眼</td>
+              <td>${data.eyeData.L.sphere || ''}</td>
+              <td>${data.eyeData.L.cylinder || ''}</td>
+              <td>${data.eyeData.L.axis || ''}</td>
+              <td>${data.eyeData.L.add || ''}</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="pdf-result">验光结果：</div>
+      `;
+      return wrapper;
+    };
+
+    const renderPreview = () => {
+      const data = getFormData();
+      preview.innerHTML = '';
+      preview.appendChild(buildPdfDom(data));
+      preview.style.display = 'block';
+    };
+
+    const downloadPdf = async () => {
+      const data = getFormData();
+      if (!data.customerName || !data.phone || !data.optometrist) {
+        alert('请填写客户姓名、电话并选择验光师');
+        return;
+      }
+      const pdfDom = buildPdfDom(data);
+      pdfDom.style.position = 'fixed';
+      pdfDom.style.top = '-10000px';
+      document.body.appendChild(pdfDom);
+
+      const canvas = await html2canvas(pdfDom, { scale: 2, useCORS: true });
+      const imgData = canvas.toDataURL('image/png');
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({ unit: 'pt', format: 'a4' });
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      const fileDate = formatDateForFile(data.time || timeInput.value);
+      const customer = safeName(data.customerName, '未命名');
+      const doctor = safeName(data.optometrist, '验光师');
+      const fileName = `${customer}-${doctor}${fileDate ? `-${fileDate}` : ''}.pdf`;
+      pdf.save(fileName);
+      document.body.removeChild(pdfDom);
+    };
+
+    previewBtn.addEventListener('click', renderPreview);
+    downloadBtn.addEventListener('click', downloadPdf);
+
+    setDefaultTime();
+
+    // 初始预览
+    renderPreview();
+  </script>
+</body>
+</html>
