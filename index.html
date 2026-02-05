@@ -109,6 +109,18 @@
     }
 
     .meta-table th { background: #f2f2f2; font-weight: 700; }
+    .meta-single td { text-align: left; font-weight: 600; }
+    .meta-single span { margin-left: 6px; font-weight: 500; }
+    .pd-unit {
+      display: inline-block;
+      min-width: 120px; /* 保持可写空间并减小断行几率 */
+      text-align: right; /* 让 mm 靠近单元格右侧 */
+      margin-left: 0;
+      vertical-align: middle; /* 与瞳距文字对齐 */
+      white-space: nowrap; /* 防止换行导致错位 */
+    }
+    .meta-bottom col.col-wide { width: 24%; }
+    .meta-bottom col.col-narrow { width: 26%; }
     .rx-table th { background: #f2f2f2; font-weight: 700; }
     .pd-right { padding-left: 108px; }
 
@@ -176,20 +188,13 @@
       <h1>浚县赵氏显微眼科配镜验光单</h1>
       <div class="doctor-line">验光师：<span id="doctorField"></span></div>
 
-      <table class="meta-table">
+      <table class="meta-table meta-single">
         <tr>
-          <th>姓名</th>
-          <th>年龄</th>
-          <th>单位或位址</th>
-          <th>电话</th>
-          <th>日期</th>
-        </tr>
-        <tr>
-          <td id="nameField"></td>
-          <td></td>
-          <td id="unitField"></td>
-          <td id="phoneField"></td>
-          <td id="dateField"></td>
+          <td>姓名：<span id="nameField"></span></td>
+          <td>年龄：</td>
+          <td>单位或位址：<span id="unitField"></span></td>
+          <td>电话：<span id="phoneField"></span></td>
+          <td>日期：<span id="dateField"></span></td>
         </tr>
       </table>
 
@@ -242,18 +247,18 @@
         </tbody>
       </table>
 
-      <table class="meta-table">
+      <table class="meta-table meta-single meta-bottom">
+        <colgroup>
+          <col class="col-wide" />
+          <col class="col-wide" />
+          <col class="col-narrow" />
+          <col class="col-narrow" />
+        </colgroup>
         <tr>
-          <th>镜片</th>
-          <th>镜架</th>
-          <th>瞳距（近用）</th>
-          <th>瞳距（远用）</th>
-        </tr>
-        <tr>
-          <td></td>
-          <td></td>
-          <td class="pd-right">mm</td>
-          <td class="pd-right">mm</td>
+          <td>镜片：</td>
+          <td>镜架：</td>
+          <td>瞳距（近用）：<span class="pd-unit">mm</span></td>
+          <td>瞳距（远用）：<span class="pd-unit">mm</span></td>
         </tr>
       </table>
 
@@ -302,14 +307,14 @@
     const buildFileName = () => {
       const n = safeName(nameInput.value, '未命名');
       const p = safeName(phoneInput.value, '');
-      const d = safeName(doctorSelect.value, '验光师');
-      return `${n}${p}-${d}.pdf`;
+      const d = safeName(doctorSelect.value, '');
+      return d ? `${n}${p}-${d}.pdf` : `${n}${p}.pdf`;
     };
 
     const downloadPdf = async () => {
       updateSheet();
-      if (!nameInput.value.trim() || !phoneInput.value.trim() || !doctorSelect.value || !dateInput.value) {
-        alert('请填写顾客姓名、手机号、日期并选择验光师');
+      if (!nameInput.value.trim() || !phoneInput.value.trim() || !dateInput.value) {
+        alert('请填写顾客姓名、手机号、日期');
         return;
       }
 
